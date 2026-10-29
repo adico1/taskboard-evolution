@@ -81,42 +81,51 @@ class TestRenameFeature(unittest.TestCase):
         proc = subprocess.run(cmd, capture_output=True, text=True)
         return proc
     def test_rename_success_and_persistence(self):
-        # Add a task
-        t1 = domain.add_task('first', self.db_path)
-        # Rename it
-        proc = self.run_cli('rename', str(t1['id']), 'updated title')
+        t = domain.add_task('first', self.db_path)
+        proc = self.run_cli('rename', str(t['id']), 'updated title')
         self.assertEqual(proc.returncode, 0)
         out = json.loads(proc.stdout)
-        self.assertEqual(out['id'], t1['id'])
+        self.assertEqual(out['id'], t['id'])
         self.assertEqual(out['title'], 'updated title')
         self.assertFalse(out['completed'])
         # Check persistence
         listed = domain.list_tasks(self.db_path)
         self.assertEqual(listed[0]['title'], 'updated title')
     def test_rename_preserves_completed_state(self):
-        t1 = domain.add_task('finished', self.db_path)
-        domain.complete_task(str(t1['id']), self.db_path)
-        proc = self.run_cli('rename', str(t1['id']), 'done renamed')
+        t = domain.add_task('finished', self.db_path)
+        domain.complete_task(str(t['id']), self.db_path)
+        proc = self.run_cli('rename', str(t['id']), 'done renamed')
         self.assertEqual(proc.returncode, 0)
         out = json.loads(proc.stdout)
-        self.assertEqual(out['id'], t1['id'])
+        self.assertEqual(out['id'], t['id'])
         self.assertEqual(out['title'], 'done renamed')
         self.assertTrue(out['completed'])
         # Check persistence
         listed = domain.list_tasks(self.db_path)
         self.assertEqual(listed[0]['title'], 'done renamed')
         self.assertTrue(listed[0]['completed'])
-    def test_rename_invalid_input_no_write(self):
-        t1 = domain.add_task('foo', self.db_path)
-        # Invalid ID
+    def test_rename_invalid_inputs_and_no_write(self):
+        t = domain.add_task('foo', self.db_path)
+        # Invalid ID: zero
         proc = self.run_cli('rename', '0', 'new title')
         self.assertEqual(proc.returncode, 2)
-        self.assertIn('error', proc.stderr)
+        self.assertIn('error', json.loads(proc.stderr))
+        # Invalid ID: negative
+        proc = self.run_cli('rename', '-1', 'new title')
+        self.assertEqual(proc.returncode, 2)
+        self.assertIn('error', json.loads(proc.stderr))
+        # Invalid ID: not found
+        proc = self.run_cli('rename', '999', 'new title')
+        self.assertEqual(proc.returncode, 2)
+        self.assertIn('error', json.loads(proc.stderr))
+        # Invalid ID: not a number
+        proc = self.run_cli('rename', 'notanumber', 'new title')
+        self.assertEqual(proc.returncode, 2)
+        self.assertIn('error', json.loads(proc.stderr))
+        # Blank/whitespace-only title
+        proc = self.run_cli('rename', str(t['id']), '   \t\n')
+        self.assertEqual(proc.returncode, 2)
+        self.assertIn('error', json.loads(proc.stderr))
+        # Ensure title not changed
         listed = domain.list_tasks(self.db_path)
         self.assertEqual(listed[0]['title'], 'foo')
-        # Blank title
-        proc2 = self.run_cli('rename', str(t1['id']), '   ')
-        self.assertEqual(proc2.returncode, 2)
-        self.assertIn('error', proc2.stderr)
-        listed2 = domain.list_tasks(self.db_path)
-        self.assertEqual(listed2[0]['title'], 'foo')

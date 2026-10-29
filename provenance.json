@@ -1,26 +1,49 @@
 {
   "baseline_generated_run": "1c76f75efec9",
-  "feature_run": "6521e84b5e7f",
+  "feature_run": "7009427b20df",
   "feature": "rename task",
   "framework": "CrewAI",
+  "factory_commit": "6bb8b5e",
   "manual_candidate_edits": 0,
-  "operator_requested_documentation_corrections": 1,
-  "operator_retries": 2,
-  "factory_retrospective_prompt_amended": true,
+  "operator_retries": 0,
+  "engine_repairs": 0,
+  "normal_gate_approvals": 3,
   "release_manifest": {
     "files": {
       ".gitignore": "7957acf95f759c64ce82b11859d2d3cd985dab3d4864e228d4f9ad251976bdd0",
-      "README.md": "37c0e650a356233605517e4ba5284b1295e4141623d5db21f2580c0c33f1d11c",
+      "README.md": "960cc7b6fd36008539ac07c55274529fde000c95c053e3ee29928701bace8486",
       "pyproject.toml": "b6a41eb9a25b084b0ce79d4d035931a002852e11df42abee9e7d70581f926cad",
       "taskboard/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "taskboard/__main__.py": "21430bc2a9b97f384e38ffc97057ace93a6c3edc5ef984d479d7d76aae3e2aa2",
       "taskboard/cli.py": "ad9cf376abe1fc8fa9f59451b8dda5c5ac8175fe4dafb9cd9ffa555efd15fe45",
       "taskboard/domain.py": "962051348a23ee496656f940d9ffc316d6fa699705ee32539a4af86949aada54",
       "taskboard/storage.py": "f3394ba491837439059a8713ef0320b20a32509f2a2d07a5c74f92b7c8bccdca",
-      "tests/test_taskboard.py": "cbdd63aea4daf3595343eb97250b86fb1c9e69dcad2181f8bb75afed88c5e54a"
+      "tests/test_taskboard.py": "c2eaab92594da1652a99d77f648cf5752cfbd5bd8281faf79c0f62819113a057"
     },
-    "archive_sha256": "84e318a8f64e73f2dddd6b83f01f80b6b8d25cd058e6cf14452f4ed96fc0b8f8"
+    "archive_sha256": "700da9fc3b6fe2fc286008128394fb91e81a8413643a93df599ca5ff99f1ce85"
   },
-  "report": "https://github.com/adico1/ai_pipeline/blob/main/reports/taskboard-rename-20261029.json",
-  "note": "Generated release files copied unchanged; this provenance file was added by the operator."
+  "verification": {
+    "project_checks": 49,
+    "generated_tests": 8,
+    "installed_project_checks": 49,
+    "installed_generated_tests": 8
+  },
+  "repeatability_runs": [
+    "f19fd540157e",
+    "7009427b20df"
+  ],
+  "report": "https://github.com/adico1/ai_pipeline/blob/715d038/reports/taskboard-documentation-repeatability-20261029.json",
+  "previous_delivery": {
+    "commit": "76047ebc1f37ccabe8491fab14078d42d3d7963a",
+    "provenance": "provenance-history/6521e84b5e7f.json"
+  },
+  "note": "Verified release bundle copied unchanged. Provenance and its history are operator-added. Local source delivery, not cloud deployment; two-run evidence is bounded.",
+  "publication_validation": {
+    "project_checks_passed": 49,
+    "generated_tests_passed": 8,
+    "release_file_hashes_match": true,
+    "limited_packaging_and_import_check": "passed",
+    "test_command": "python -m unittest discover -s tests -v",
+    "acceptance_checker": "https://github.com/adico1/ai_pipeline/blob/715d038/integrations/taskboard/rename_adapter.py"
+  }
 }
