@@ -59,3 +59,17 @@ def complete_task(task_id, db_path):
             )
             conn.commit()
         return {"id": row[0], "title": row[1], "completed": True}
+
+def rename_task(task_id, new_title, db_path):
+    with _get_conn(db_path) as conn:
+        cur = conn.execute(
+            "SELECT id, title, completed FROM tasks WHERE id = ?", (task_id,)
+        )
+        row = cur.fetchone()
+        if not row:
+            return None
+        conn.execute(
+            "UPDATE tasks SET title = ? WHERE id = ?", (new_title, task_id)
+        )
+        conn.commit()
+        return {"id": row[0], "title": new_title, "completed": bool(row[2])}

@@ -25,3 +25,18 @@ def complete_task(id_str, db_path):
     if task is None:
         raise TaskboardError("Task not found")
     return task
+
+def rename_task(id_str, title, db_path):
+    try:
+        id_int = int(id_str)
+    except Exception:
+        raise TaskboardError("Invalid task ID")
+    if id_int <= 0 or id_int > 9223372036854775807:
+        raise TaskboardError("Invalid task ID")
+    trimmed = title.strip()
+    if not trimmed:
+        raise TaskboardError("Title cannot be blank")
+    task = storage.rename_task(id_int, trimmed, db_path)
+    if task is None:
+        raise TaskboardError("Task not found")
+    return task

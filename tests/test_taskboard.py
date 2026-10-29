@@ -2,6 +2,7 @@ import unittest
 import tempfile
 import os
 import json
+import subprocess
 from taskboard import domain
 from taskboard import storage
 
@@ -68,3 +69,54 @@ class TestPersistence(unittest.TestCase):
         finally:
             os.close(db_fd)
             os.remove(db_path)
+
+class TestRenameFeature(unittest.TestCase):
+    def setUp(self):
+        self.db_fd, self.db_path = tempfile.mkstemp(suffix='.sqlite3')
+    def tearDown(self):
+        os.close(self.db_fd)
+        os.remove(self.db_path)
+    def run_cli(self, *args):
+        cmd = ['python', '-m', 'taskboard', '--database', self.db_path] + list(args)
+        proc = subprocess.run(cmd, capture_output=True, text=True)
+        return proc
+    def test_rename_success_and_persistence(self):
+        # Add a task
+        t1 = domain.add_task('first', self.db_path)
+        # Rename it
+        proc = self.run_cli('rename', str(t1['id']), 'updated title')
+        self.assertEqual(proc.returncode, 0)
+        out = json.loads(proc.stdout)
+        self.assertEqual(out['id'], t1['id'])
+        self.assertEqual(out['title'], 'updated title')
+        self.assertFalse(out['completed'])
+        # Check persistence
+        listed = domain.list_tasks(self.db_path)
+        self.assertEqual(listed[0]['title'], 'updated title')
+    def test_rename_preserves_completed_state(self):
+        t1 = domain.add_task('finished', self.db_path)
+        domain.complete_task(str(t1['id']), self.db_path)
+        proc = self.run_cli('rename', str(t1['id']), 'done renamed')
+        self.assertEqual(proc.returncode, 0)
+        out = json.loads(proc.stdout)
+        self.assertEqual(out['id'], t1['id'])
+        self.assertEqual(out['title'], 'done renamed')
+        self.assertTrue(out['completed'])
+        # Check persistence
+        listed = domain.list_tasks(self.db_path)
+        self.assertEqual(listed[0]['title'], 'done renamed')
+        self.assertTrue(listed[0]['completed'])
+    def test_rename_invalid_input_no_write(self):
+        t1 = domain.add_task('foo', self.db_path)
+        # Invalid ID
+        proc = self.run_cli('rename', '0', 'new title')
+        self.assertEqual(proc.returncode, 2)
+        self.assertIn('error', proc.stderr)
+        listed = domain.list_tasks(self.db_path)
+        self.assertEqual(listed[0]['title'], 'foo')
+        # Blank title
+        proc2 = self.run_cli('rename', str(t1['id']), '   ')
+        self.assertEqual(proc2.returncode, 2)
+        self.assertIn('error', proc2.stderr)
+        listed2 = domain.list_tasks(self.db_path)
+        self.assertEqual(listed2[0]['title'], 'foo')

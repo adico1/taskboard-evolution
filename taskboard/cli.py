@@ -17,6 +17,10 @@ def main():
     complete_parser = subparsers.add_parser('complete', help='Complete a task')
     complete_parser.add_argument('id', type=str, help='Task ID to complete')
 
+    rename_parser = subparsers.add_parser('rename', help='Rename a task')
+    rename_parser.add_argument('id', type=str, help='Task ID to rename')
+    rename_parser.add_argument('title', type=str, help='New title for the task')
+
     args = parser.parse_args()
     db_path = args.database
     try:
@@ -30,6 +34,10 @@ def main():
             sys.exit(0)
         elif args.command == 'complete':
             result = domain.complete_task(args.id, db_path)
+            print(json.dumps(result), flush=True)
+            sys.exit(0)
+        elif args.command == 'rename':
+            result = domain.rename_task(args.id, args.title, db_path)
             print(json.dumps(result), flush=True)
             sys.exit(0)
         else:
